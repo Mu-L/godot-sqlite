@@ -24,6 +24,8 @@ void SQLite::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("create_function", "function_name", "callable", "arguments"), &SQLite::create_function);
 
+	ClassDB::bind_method(D_METHOD("export_to_array", "array"), &SQLite::export_to_array);
+
 	ClassDB::bind_method(D_METHOD("import_from_json", "import_path"), &SQLite::import_from_json);
 	ClassDB::bind_method(D_METHOD("export_to_json", "export_path"), &SQLite::export_to_json);
 
@@ -886,10 +888,11 @@ bool SQLite::import_from_json(String import_path) {
 	return true;
 }
 
-bool SQLite::export_to_json(String export_path) {
+bool SQLite::export_to_array(TypedArray<Dictionary> database_array) {
+	database_array.clear();
 	/* Get all names and sql templates for all tables present in the database */
 	query(String("SELECT name,sql,type FROM sqlite_master WHERE type = 'table' OR type = 'trigger';"));
-	TypedArray<Dictionary> database_array = query_result.duplicate(true);
+	database_array.append_array(query_result.duplicate(true));
 #ifdef SQLITE_ENABLE_FTS5
 	/* FTS5 creates a bunch of shadow tables that should NOT be exported! */
 	remove_shadow_tables(database_array);
@@ -940,6 +943,13 @@ bool SQLite::export_to_json(String export_path) {
 			object_dict["row_array"] = query_result.duplicate(true);
 		}
 	}
+
+	return true;
+}
+
+bool SQLite::export_to_json(String export_path) {
+	TypedArray<Dictionary> database_array = TypedArray<Dictionary>();
+	export_to_array(database_array);
 
 	/* Add .json to the import_path String if not present */
 	String ending = String(".json");

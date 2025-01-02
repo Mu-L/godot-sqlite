@@ -86,6 +86,8 @@ public:
 
 	bool create_function(const String &p_name, const Callable &p_callable, int p_argc);
 
+	bool export_to_array(TypedArray<Dictionary> array);
+
 	bool import_from_json(String import_path);
 	bool export_to_json(String export_path);
 
