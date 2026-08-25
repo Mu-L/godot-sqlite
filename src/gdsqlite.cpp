@@ -1302,6 +1302,7 @@ void SQLite::update_error_message(int rc) {
 	/* However, setting the message to an empty string makes much more sense. */
 	if (rc == SQLITE_OK || rc == SQLITE_ROW || rc == SQLITE_DONE) {
 		error_message = "";
+		return;
 	}
 	const char *zErrMsg = sqlite3_errmsg(db);
 	error_message = String::utf8(zErrMsg);
